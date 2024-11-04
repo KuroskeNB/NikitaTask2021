@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour
     public Card SpaceCard;
     [SerializeField] private AudioClip gameEndSounds;
     [SerializeField] private Vector2[] layouts;
-    [SerializeField] Text matchesInRowTxt,matchesTxt,turnsTxt,inRowRewardTxt,levelFinishedTxt;
+    [SerializeField] Text matchesInRowTxt,matchesTxt,turnsTxt,inRowRewardTxt,levelFinishedTxt,startNextTxt;
      private int InRowRewards,levelsFinished=0;
     private int cardCount=0;
      [SerializeField] private GridLayoutGroup layoutGroup;
@@ -73,7 +73,7 @@ public class UIManager : MonoBehaviour
         InRowRewards--;
         if(inRowRewardTxt)
         inRowRewardTxt.text=InRowRewards.ToString();
-      StartTheGame();
+      StartTheGame(); // show cards for startDelay
       }
     }
     
@@ -91,15 +91,16 @@ public class UIManager : MonoBehaviour
   // level and card management
     void StartNextClicked()
     {
+      if(levelsFinished<layouts.Length)
       SpawnLevelCards(layouts[levelsFinished]);
     }
     
     private List<Card> ShuffleCards(int rows, int columns)
     {
       List<Card> cardList = new List<Card>();
-      int CardCount = rows*columns;
-      if(CardCount%2!=0)
-      CardCount-=1;
+      int CardCountInDeck = rows*columns;
+      if(CardCountInDeck%2!=0)
+      CardCountInDeck-=1;
       int num=0;
         foreach (var item in cardTypes)
         {
@@ -110,7 +111,7 @@ public class UIManager : MonoBehaviour
             cardList.Add(tempCard);
             num++;
           }
-          if(num==CardCount)
+          if(num==CardCountInDeck)
           break;
         }
         Debug.Log("list count is"+cardList.Count);
@@ -135,6 +136,8 @@ public class UIManager : MonoBehaviour
 
     void StartTheGame()
     {
+      if(startNextTxt)
+      startNextTxt.enabled=false;
       Debug.Log("start the game");
       foreach (var item in spawnedCards) // show all cards for a start
       {
@@ -149,16 +152,17 @@ public class UIManager : MonoBehaviour
     private void SetupTheLevel(int rows, int columns)
     {
       bool bIsEven = (rows*columns)%2==0;
-        int CardCount = rows*columns;
+
+      int CardCountRequire = rows*columns;
         List<Card> cardList = ShuffleCards(rows,columns);
         int emptyCardNum=-1;
         if(!bIsEven)
         {
             emptyCardNum=(rows*columns)/2;
         }
-        layoutGroup.cellSize=CalculateCardSize(rows,columns,rows*columns);
+        layoutGroup.cellSize=CalculateCardSize(rows,columns);
 
-        for (int i = 0; i < CardCount; i++)   
+        for (int i = 0; i < CardCountRequire; i++)   
         {
             if(i==emptyCardNum) // if there is not even number of row*columns
             {
@@ -177,7 +181,7 @@ public class UIManager : MonoBehaviour
           cardList[randomCard].transform.SetParent(layoutGroup.transform,false);
           cardList[randomCard].cardInfo.cardPosition=i;
 
-          cardList.RemoveAt(randomCard); //card was added to screen
+          cardList.RemoveAt(randomCard); //card was added to screen and we do not need it again
         }
     }
 
@@ -215,12 +219,13 @@ public class UIManager : MonoBehaviour
       }
       spawnedCards=new Card[0];
       bLevelOnScreen=false;
-
+      if(startNextTxt)
+      startNextTxt.enabled=true;
       if(gameManager)
       gameManager.LevelFinish();
     }
 
-    private Vector2 CalculateCardSize(int rows, int columns, int CardsNumber)
+    private Vector2 CalculateCardSize(int rows, int columns)
     {
         RectTransform rectTransform = layoutGroup.GetComponent<RectTransform>();
         float containerWidth = rectTransform.rect.width;
