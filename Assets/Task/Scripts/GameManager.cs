@@ -40,6 +40,13 @@ public class GameManager : MonoBehaviour
      uiManager.UpdateScoring(MatchesInRow,Matches,Turns);
     }
 
+    public void ClearSaved()
+    {
+      MatchesInRow=0;
+      Turns=0;
+      Matches=0;
+    }
+
     private void CardMatch(Card card)
     {
         //audio

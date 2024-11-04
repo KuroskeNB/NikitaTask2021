@@ -46,15 +46,18 @@ public class UIManager : MonoBehaviour
     
     private void ClearProgress() // start from the begining
     {
-      //if(bLevelOnScreen) return;
       SaveLoadManager.Instance.ClearSaves();
 
       InRowRewards=0;
       levelsFinished=0;
-        if(inRowRewardTxt)
+      if(gameManager)
+      gameManager.ClearSaved();
+      
+       if(inRowRewardTxt)
         inRowRewardTxt.text=InRowRewards.ToString();
         if(levelFinishedTxt)
      levelFinishedTxt.text=levelsFinished.ToString();
+
      if(bLevelOnScreen)
      LevelClear();
     }
